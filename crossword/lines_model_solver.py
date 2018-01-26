@@ -13,14 +13,12 @@ to terminate if the crossoword is big. The reasons are :
 """
 from constraint_programming import constraint_programming
 from crossword_parsing import Crossword, read_words
+import datetime
 
-WORDS = "../words3.txt"
-CROSSWORD = "../crossword1.txt"
+WORDS = "../../words3.txt"
+CROSSWORD = "../../crossword1.txt"
 
-if __name__=="__main__":
-    words = read_words(WORDS)
-    cw = Crossword(CROSSWORD)
-
+def solve(words, crossword):
     # A segment can only contain a word that has its size
     var = {str(segment): set([word for word in words[segment.length()]]) for segment in cw.hsegments+cw.vsegments}
     P = constraint_programming(var)
@@ -55,4 +53,17 @@ if __name__=="__main__":
         P.addConstraint(str(hsegment), str(vsegment), SAME_LETTER_INTERSECT)
 
     sol = P.solve()
+    return sol
+
+if __name__=="__main__":
+    start = datetime.datetime.now()
+    # Get words
+    words = read_words(WORDS)
+    # Get crossword
+    cw = Crossword(CROSSWORD)
+    # Solve the problem for words and cw
+    sol = solve(words, cw)
+    end = datetime.datetime.now()
+    duration = end-start
     print(sol)
+    print("The result was computed in {}".format(duration))
