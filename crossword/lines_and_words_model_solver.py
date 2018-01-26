@@ -12,9 +12,19 @@ from crossword_parsing import Crossword, read_words
 import string
 import datetime
 
-WORDS = "../../words3.txt"
-CROSSWORD = "../../crossword1.txt"
+WORDS = "../../words2.txt"
+CROSSWORD = "../../crossword2.txt"
 
+def letters_positions_from(solution):
+    positions = []
+    for key, value in solution.items():
+        if type(value)==str:
+            if len(value)==1:
+                letter = value
+                position = key
+                positions.append((letter, position))
+    return positions
+                
 def solve(words, crossword):
     # The variables are the letters in each case and the words in each segment
     cases = []
@@ -23,7 +33,7 @@ def solve(words, crossword):
         cases += segment.get_points()
     cases = set(cases)
     # Each case can contain one letter from the alphabet
-    var = {str(case): set([letter for letter in list(string.ascii_lowercase)]) for case in cases}
+    var = {case: set([letter for letter in list(string.ascii_lowercase)]) for case in cases}
     # Each segment can contain a word from the list of words allowed
     for segment in cw.hsegments+cw.vsegments:
         var[str(segment)] = set([word for word in words[segment.length()]])
@@ -38,9 +48,10 @@ def solve(words, crossword):
             elif segment.is_vertical():
                 i = case[1] - segment.origin[1]
             CASE_FROM_SEGMENT = {(word, word[i]) for word in words[segment.length()]}
-            P.addConstraint(str(segment), str(case), CASE_FROM_SEGMENT)
+            P.addConstraint(str(segment), case, CASE_FROM_SEGMENT)
     sol = P.solve()
-    return sol
+    letters_positions = letters_positions_from(sol)
+    return letters_positions
 
 if __name__=="__main__":
     start = datetime.datetime.now()
@@ -49,8 +60,8 @@ if __name__=="__main__":
     # Get crossword
     cw = Crossword(CROSSWORD)
     # Solve the problem for words and cw
-    sol = solve(words, cw)
+    letters_positions = solve(words, cw)
     end = datetime.datetime.now()
     duration = end-start
-    print(sol)
+    cw.display_solution(letters_positions)
     print("The result was computed in {}".format(duration))
