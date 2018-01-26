@@ -15,6 +15,19 @@ def read_words(path):
             words[length] = [word]
     return words
 
+def read_words_intersect(path):
+    f = open(path, "r")
+    lines = f.readlines()
+    words = dict()
+    for line in lines:
+        word = line.strip()
+        length = len(word)
+        if length in words.keys():
+            words[length] += [word]
+        else:
+            words[length] = [word]
+    return words
+
 # words = read_words(WORDS)
 
 hashes_regex = re.compile("\.+")
@@ -33,10 +46,16 @@ class Line:
         if self.is_horizontal():
             return "horizontal"
     def is_vertical(self):
-        return self.origin[0]==self.end[0] and self.origin[1]!=self.origin[1]
+        return self.origin[0]==self.end[0] and self.origin[1]!=self.end[1]
     def is_horizontal(self):
-        return self.origin[1]==self.end[1] and self.origin[0]!=self.origin[0]
-    
+        return self.origin[1]==self.end[1] and self.origin[0]!=self.end[0]
+    def get_points(self):
+        if self.is_horizontal():
+            return [(i, self.origin[1]) for i in range(self.origin[0], self.end[0]+1)]
+        elif self.is_vertical():
+            return [(self.origin[0], i) for i in range(self.origin[1], self.end[1]+1)]
+        else:
+            print("Error")
 
 def parse_horizontally(path):
     f = open(path, "r")
@@ -118,15 +137,24 @@ def find_intersections(hlines, vlines):
 
 # intersections = find_intersections(hlines, vlines)
 
+def read_crossword_size(path):
+    f = open(path, "r")
+    line = f.readline()
+    line = line.strip()
+    return len(line)
+
 class Crossword:
     def __init__(self, path):
         self.path = path
         self.find_lines()
         self.find_intersections()
+        self.find_size()
     def find_lines(self):
         self.hlines, self.vlines = read_crossword(self.path)
     def find_intersections(self):
         self.intersections = find_intersections(self.hlines, self.vlines)
+    def find_size(self):
+        self.size = read_crossword_size(self.path)
     def __repr__(self):
         return "horizontal lines: {}\nvertical lines: {}\nintersections: {}>".format(self.hlines, self.vlines, self.intersections)
         
