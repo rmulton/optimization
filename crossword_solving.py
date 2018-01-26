@@ -1,8 +1,8 @@
 from constraint_programming import constraint_programming
 from crossword_parsing import Crossword, read_words
 
-WORDS = "../words2.txt"
-CROSSWORD = "../crossword2.txt"
+WORDS = "../words3.txt"
+CROSSWORD = "../crossword1.txt"
 
 words = read_words(WORDS)
 cw = Crossword(CROSSWORD)
@@ -10,6 +10,22 @@ cw = Crossword(CROSSWORD)
 print("Creating var")
 var = {str(line): set([word for word in words[line.length()]]) for line in cw.hlines+cw.vlines}
 P = constraint_programming(var)
+
+lines = cw.hlines + cw.vlines
+
+# A word is used only once
+
+for length in words.keys():
+    print("Creating NEQ for length {}".format(length))
+    NEQ = {(word, other_word) for word in words[length] for other_word in words[length] if (word!=other_word)}
+    lines_of_length = [line for line in lines if line.length()==length]
+    for line in lines_of_length:
+        for other_line in lines_of_length:
+            if line!=other_line:
+                print("Adding neq for lines {} and {}".format(line, other_line))
+                P.addConstraint(str(line), str(other_line), NEQ)
+    del(NEQ)
+
 
 def get_intersection_possibilities(i, j, hlength, vlength):
     return {(word, other_word) for word in words[hlength] for other_word in words[vlength] if (word[i]==other_word[j] and word!=other_word)}
@@ -25,22 +41,6 @@ for intersection in cw.intersections:
     SAME_LETTER_INTERSECT = get_intersection_possibilities(*intersection['position_in_lines'], hline.length(), vline.length())
     P.addConstraint(str(hline), str(vline), SAME_LETTER_INTERSECT)
 
-
-lines = cw.hlines + cw.vlines
-
-print("Creating NEQ")
-# A word is used only once
-def get_neq(length): # classer les mots par taille
-        NEQ = {(word, other_word) for word in words[length] for other_word in words[length] if (word!=other_word)}
-        return NEQ
-
-for line in lines:
-    for other_line in lines:
-        if line!=other_line:
-            if line.length()==other_line.length():
-                NEQ = get_neq(line.length())
-                if NEQ:
-                    P.addConstraint(str(line), str(other_line), NEQ)
 
 print("Solving")
 sol = P.solve()
