@@ -18,6 +18,7 @@ def read_words(path):
     words = dict()
     for line in lines:
         word = line.strip()
+        word = word.lower()
         length = len(word)
         if length in words.keys():
             words[length] += [word]
@@ -176,3 +177,22 @@ class Crossword:
         self.size = read_crossword_size(self.path)
     def __repr__(self):
         return "horizontal segments: {}\nvertical segments: {}\nintersections: {}>".format(self.hsegments, self.vsegments, self.intersections)
+    def display_solution(self, letters_positions):
+        display_crossword_with_letters(self.path, letters_positions)
+        
+def display_crossword_with_letters(path, letters_positions):
+    f = open(path)
+    lines = f.read().split("\n")
+    for letter, position in letters_positions:
+        line = lines[position[1]]
+        line = line[:position[0]] + letter + line[position[0]+1:]
+        lines[position[1]] = line
+    for line in lines:
+        line = extend_line(line)
+        print(line)
+
+def extend_line(line):
+    new_line = ""
+    for letter in line:
+        new_line += letter+ " "
+    return new_line
