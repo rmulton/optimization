@@ -2,7 +2,7 @@
 This file implements a solver for the crossword problem.
 It models the problem using segments and letters.
 
-This model works fine on big crosswords because the number of letters is 27.
+This model works fine on big crosswords because the number of letters is 26.
 However, it can output a result that uses the same word twice. This makes it much faster
 but prevent it from proving that there is no solution in some cases.
 """
@@ -18,7 +18,7 @@ if __name__=="__main__":
     words = read_words(WORDS)
     cw = Crossword(CROSSWORD)
 
-    # The variables are the letters in each case and the words in each segment
+    # The domains are the letters in each case and the words in each segment
     cases = []
     # Get all the cases that are in a segment
     for segment in cw.hsegments+cw.vsegments:
